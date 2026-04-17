@@ -14,7 +14,7 @@ Chỉ chứa entity, value object, error nghiệp vụ cơ bản.
 
 Tạo:
 
-- `internal/repository/user_repository.go`
+- `internal/domain/user/repository.go`
 
 Định nghĩa các hành vi cần cho usecase.
 
@@ -22,7 +22,7 @@ Tạo:
 
 Tạo:
 
-- `internal/usecase/user_usecase.go`
+- `internal/usecase/user/usecase.go`
 
 Usecase nhận repository interface qua constructor.
 
@@ -33,6 +33,8 @@ Tạo:
 - `internal/infrastructure/persistence/postgres/user_repository.go`
 
 Đây là nơi dùng GORM/Postgres model mapping.
+
+Nếu module không cần truy cập database, có thể bỏ qua bước này. Ví dụ `health` chỉ cần domain + usecase + delivery.
 
 ## 5. HTTP delivery
 
@@ -55,7 +57,7 @@ Cập nhật `internal/bootstrap/app.go`:
 
 ## 7. Register routes
 
-Cập nhật `internal/delivery/http/router/router.go`
+Các handler tự đăng ký route, rồi đăng ký chúng trong `internal/delivery/http/router/router.go`
 
 ## 8. Create migration
 

@@ -2,11 +2,19 @@
 
 import { useState } from "react";
 
-import type { CreateTodoPayload } from "@/types/todo";
+import {
+  TODO_CREATE_LABEL,
+  TODO_CREATING_LABEL,
+  TODO_DESCRIPTION_PLACEHOLDER,
+  TODO_ERROR_MESSAGE,
+  TODO_TITLE_PLACEHOLDER,
+  TODO_TITLE_REQUIRED_MESSAGE
+} from "@/features/todos/constants";
+import type { CreateTodoInput } from "@/features/todos/types";
 
 type TodoCreateFormProps = {
   isSubmitting: boolean;
-  onSubmit: (payload: CreateTodoPayload) => Promise<void>;
+  onSubmit: (payload: CreateTodoInput) => Promise<void>;
 };
 
 export function TodoCreateForm({
@@ -21,7 +29,7 @@ export function TodoCreateForm({
     event.preventDefault();
 
     if (!title.trim()) {
-      setFormError("Title is required");
+      setFormError(TODO_TITLE_REQUIRED_MESSAGE);
       return;
     }
 
@@ -36,9 +44,7 @@ export function TodoCreateForm({
       setTitle("");
       setDescription("");
     } catch (error) {
-      setFormError(
-        error instanceof Error ? error.message : "Failed to create todo"
-      );
+      setFormError(error instanceof Error ? error.message : TODO_ERROR_MESSAGE);
     }
   }
 
@@ -47,14 +53,14 @@ export function TodoCreateForm({
       <input
         className="input"
         type="text"
-        placeholder="Todo title"
+        placeholder={TODO_TITLE_PLACEHOLDER}
         value={title}
         onChange={(event) => setTitle(event.target.value)}
       />
 
       <textarea
         className="textarea"
-        placeholder="Description"
+        placeholder={TODO_DESCRIPTION_PLACEHOLDER}
         value={description}
         onChange={(event) => setDescription(event.target.value)}
       />
@@ -62,7 +68,7 @@ export function TodoCreateForm({
       {formError ? <div className="error-state">{formError}</div> : null}
 
       <button className="button" type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Creating..." : "Create todo"}
+        {isSubmitting ? TODO_CREATING_LABEL : TODO_CREATE_LABEL}
       </button>
     </form>
   );

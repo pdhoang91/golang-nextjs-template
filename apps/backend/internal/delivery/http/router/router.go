@@ -8,16 +8,15 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/your-org/fullstack-template/apps/backend/internal/config"
-	"github.com/your-org/fullstack-template/apps/backend/internal/delivery/http/handler"
+	"github.com/your-org/fullstack-template/apps/backend/internal/constants"
 	"github.com/your-org/fullstack-template/apps/backend/internal/delivery/http/middleware"
 )
 
-type Handlers struct {
-	Health *handler.HealthHandler
-	Todo   *handler.TodoHandler
+type RouteRegistrar interface {
+	RegisterRoutes(rg *gin.RouterGroup)
 }
 
-func New(cfg *config.Config, logger *slog.Logger, handlers Handlers) *gin.Engine {
+func New(cfg *config.Config, logger *slog.Logger, registrars []RouteRegistrar) *gin.Engine {
 	if cfg.AppEnv == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -29,17 +28,17 @@ func New(cfg *config.Config, logger *slog.Logger, handlers Handlers) *gin.Engine
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     cfg.AllowedOrigins(),
 		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodOptions},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Request-ID"},
-		ExposeHeaders:    []string{"X-Request-ID"},
+		AllowHeaders:     []string{constants.HeaderOrigin, constants.HeaderContentType, constants.HeaderAccept, constants.HeaderAuthorization, constants.HeaderRequestID},
+		ExposeHeaders:    []string{constants.HeaderRequestID},
 		AllowCredentials: true,
 	}))
 
-	r.GET("/health", handlers.Health.Get)
+	apiV1 := r.Group(constants.APIV1Prefix)
 
-	apiV1 := r.Group("/api/v1")
-	{
-		apiV1.GET("/todos", handlers.Todo.List)
-		apiV1.POST("/todos", middleware.AuthPlaceholder(), handlers.Todo.Create)
+	for _, registrar := range registrars {
+		if registrar != nil {
+			registrar.RegisterRoutes(apiV1)
+		}
 	}
 
 	return r

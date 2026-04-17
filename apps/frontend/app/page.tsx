@@ -1,19 +1,16 @@
 import { Container } from "@/components/layout/container";
-import { HealthStatusCard } from "@/features/health/components/health-status-card";
-import { TodoListCard } from "@/features/todos/components/todo-list-card";
+import { APP_HERO_COPY, APP_HERO_EYEBROW, APP_HERO_TITLE } from "@/constants/copy";
+import { HealthStatusCard } from "@/features/health/components/card";
+import { TodoListCard } from "@/features/todos/components/list";
 
 export default function HomePage() {
   return (
     <main>
       <Container>
         <section className="hero">
-          <p className="eyebrow">Production-ready starter</p>
-          <h1>Go + Next.js monorepo template</h1>
-          <p className="hero-copy">
-            A clean base project with a structured backend, typed frontend,
-            Docker Compose, migrations, and an example todo module wired
-            end-to-end.
-          </p>
+          <p className="eyebrow">{APP_HERO_EYEBROW}</p>
+          <h1>{APP_HERO_TITLE}</h1>
+          <p className="hero-copy">{APP_HERO_COPY}</p>
         </section>
 
         <section className="grid">

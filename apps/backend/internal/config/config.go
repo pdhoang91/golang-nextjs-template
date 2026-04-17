@@ -6,6 +6,8 @@ import (
 
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
+
+	"github.com/your-org/fullstack-template/apps/backend/internal/constants"
 )
 
 type Config struct {
@@ -57,7 +59,7 @@ func (c Config) AllowedOrigins() []string {
 
 func (c Config) DatabaseDSN() string {
 	return fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+		constants.PostgresDSNFormat,
 		c.DBHost,
 		c.DBPort,
 		c.DBUser,
@@ -69,7 +71,7 @@ func (c Config) DatabaseDSN() string {
 
 func (c Config) MigrationDatabaseURL() string {
 	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%d/%s?sslmode=%s",
+		constants.MigrationDatabaseURLFormat,
 		c.DBUser,
 		c.DBPassword,
 		c.DBHost,

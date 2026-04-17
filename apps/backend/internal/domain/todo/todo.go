@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var ErrInvalidTitle = errors.New("todo title is required")
+var ErrInvalidTitle = errors.New(ErrInvalidTitleMessage)
 
 type Todo struct {
 	ID          uuid.UUID

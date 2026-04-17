@@ -7,10 +7,12 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+
+	"github.com/your-org/fullstack-template/apps/backend/internal/constants"
 )
 
 func Up(databaseURL string, migrationsPath string) error {
-	m, err := migrate.New(fmt.Sprintf("file://%s", migrationsPath), databaseURL)
+	m, err := migrate.New(fmt.Sprintf(constants.FileSchemeFormat, migrationsPath), databaseURL)
 	if err != nil {
 		return err
 	}
@@ -24,7 +26,7 @@ func Up(databaseURL string, migrationsPath string) error {
 }
 
 func Down(databaseURL string, migrationsPath string) error {
-	m, err := migrate.New(fmt.Sprintf("file://%s", migrationsPath), databaseURL)
+	m, err := migrate.New(fmt.Sprintf(constants.FileSchemeFormat, migrationsPath), databaseURL)
 	if err != nil {
 		return err
 	}

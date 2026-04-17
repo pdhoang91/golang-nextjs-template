@@ -3,19 +3,19 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-)
 
-const RequestIDKey = "request_id"
+	"github.com/your-org/fullstack-template/apps/backend/internal/constants"
+)
 
 func RequestID() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		requestID := c.GetHeader("X-Request-ID")
+		requestID := c.GetHeader(constants.HeaderRequestID)
 		if requestID == "" {
 			requestID = uuid.NewString()
 		}
 
-		c.Set(RequestIDKey, requestID)
-		c.Writer.Header().Set("X-Request-ID", requestID)
+		c.Set(constants.ContextRequestIDKey, requestID)
+		c.Writer.Header().Set(constants.HeaderRequestID, requestID)
 		c.Next()
 	}
 }

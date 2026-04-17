@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 
+import { HEALTH_ERROR_MESSAGE } from "@/features/health/constants";
 import { useAsyncState } from "@/hooks/use-async-state";
 import { getHealth } from "@/services/health.service";
-import type { HealthResponse } from "@/types/health";
+import type { HealthResponse } from "@/features/health/types";
 
 export function useHealth() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
@@ -22,7 +23,7 @@ export function useHealth() {
         succeed();
       } catch (err) {
         if (!isMounted) return;
-        fail(err instanceof Error ? err.message : "Failed to fetch health status");
+        fail(err instanceof Error ? err.message : HEALTH_ERROR_MESSAGE);
       }
     }
 

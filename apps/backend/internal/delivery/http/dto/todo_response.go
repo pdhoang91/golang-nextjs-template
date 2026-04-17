@@ -8,11 +8,6 @@ import (
 	"github.com/your-org/fullstack-template/apps/backend/internal/domain/todo"
 )
 
-type CreateTodoRequest struct {
-	Title       string `json:"title" binding:"required"`
-	Description string `json:"description"`
-}
-
 type TodoResponse struct {
 	ID          uuid.UUID `json:"id"`
 	Title       string    `json:"title"`

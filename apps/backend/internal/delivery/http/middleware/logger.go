@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/your-org/fullstack-template/apps/backend/internal/constants"
 )
 
 func RequestLogger(logger *slog.Logger) gin.HandlerFunc {
@@ -12,15 +14,15 @@ func RequestLogger(logger *slog.Logger) gin.HandlerFunc {
 		startedAt := time.Now()
 		c.Next()
 
-		requestID, _ := c.Get(RequestIDKey)
+		requestID, _ := c.Get(constants.ContextRequestIDKey)
 
-		logger.Info("http_request",
-			"request_id", requestID,
-			"method", c.Request.Method,
-			"path", c.Request.URL.Path,
-			"status", c.Writer.Status(),
-			"client_ip", c.ClientIP(),
-			"duration_ms", time.Since(startedAt).Milliseconds(),
+		logger.Info(constants.LogHTTPRequest,
+			constants.LogFieldRequestID, requestID,
+			constants.LogFieldMethod, c.Request.Method,
+			constants.LogFieldPath, c.Request.URL.Path,
+			constants.LogFieldStatus, c.Writer.Status(),
+			constants.LogFieldClientIP, c.ClientIP(),
+			constants.LogFieldDurationMS, time.Since(startedAt).Milliseconds(),
 		)
 	}
 }

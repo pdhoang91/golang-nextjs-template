@@ -1,4 +1,6 @@
 import { env } from "@/config/env";
+import { API_ERROR_MESSAGE } from "@/constants/copy";
+import { CONTENT_TYPE_JSON, HTTP_HEADER_CONTENT_TYPE } from "@/constants/http";
 import type { ApiErrorPayload } from "@/types/api";
 
 type RequestInitWithJson = RequestInit & {
@@ -10,7 +12,7 @@ export async function apiClient<T>(
   options: RequestInitWithJson = {}
 ): Promise<T> {
   const headers = new Headers(options.headers ?? {});
-  headers.set("Content-Type", "application/json");
+  headers.set(HTTP_HEADER_CONTENT_TYPE, CONTENT_TYPE_JSON);
 
   const response = await fetch(`${env.apiBaseUrl}${path}`, {
     ...options,
@@ -19,7 +21,7 @@ export async function apiClient<T>(
   });
 
   if (!response.ok) {
-    let message = "Request failed";
+    let message = API_ERROR_MESSAGE;
 
     try {
       const payload = (await response.json()) as ApiErrorPayload;

@@ -9,13 +9,15 @@ import (
 	"time"
 
 	"github.com/your-org/fullstack-template/apps/backend/internal/config"
+	"github.com/your-org/fullstack-template/apps/backend/internal/constants"
 	"github.com/your-org/fullstack-template/apps/backend/internal/delivery/http/handler"
 	"github.com/your-org/fullstack-template/apps/backend/internal/delivery/http/router"
 	"github.com/your-org/fullstack-template/apps/backend/internal/infrastructure/database"
 	infraLogger "github.com/your-org/fullstack-template/apps/backend/internal/infrastructure/logger"
 	"github.com/your-org/fullstack-template/apps/backend/internal/infrastructure/migration"
 	postgresrepo "github.com/your-org/fullstack-template/apps/backend/internal/infrastructure/persistence/postgres"
-	"github.com/your-org/fullstack-template/apps/backend/internal/usecase"
+	healthusecase "github.com/your-org/fullstack-template/apps/backend/internal/usecase/health"
+	usetodo "github.com/your-org/fullstack-template/apps/backend/internal/usecase/todo"
 	"gorm.io/gorm"
 )
 
@@ -43,15 +45,16 @@ func NewApp(_ context.Context) (*App, error) {
 		return nil, fmt.Errorf("connect database: %w", err)
 	}
 
+	healthUsecase := healthusecase.NewHealthUsecase(cfg.AppName, cfg.AppEnv)
 	todoRepository := postgresrepo.NewTodoRepository(db)
-	todoUsecase := usecase.NewTodoUsecase(todoRepository)
+	todoUsecase := usetodo.NewTodoUsecase(todoRepository)
 
-	healthHandler := handler.NewHealthHandler(cfg)
+	healthHandler := handler.NewHealthHandler(healthUsecase)
 	todoHandler := handler.NewTodoHandler(todoUsecase)
 
-	r := router.New(cfg, logger, router.Handlers{
-		Health: healthHandler,
-		Todo:   todoHandler,
+	r := router.New(cfg, logger, []router.RouteRegistrar{
+		healthHandler,
+		todoHandler,
 	})
 
 	httpServer := &http.Server{
@@ -72,7 +75,7 @@ func (a *App) Run(ctx context.Context) error {
 	errorCh := make(chan error, 1)
 
 	go func() {
-		a.logger.Info("starting http server", "address", a.cfg.Address())
+		a.logger.Info(constants.LogStartingHTTPServer, "address", a.cfg.Address())
 		if err := a.httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			errorCh <- err
 			return
@@ -87,7 +90,7 @@ func (a *App) Run(ctx context.Context) error {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Duration(a.cfg.ShutdownTimeout)*time.Second)
 		defer cancel()
 
-		a.logger.Info("shutting down application")
+		a.logger.Info(constants.LogShuttingDownApplication)
 
 		if err := a.httpServer.Shutdown(shutdownCtx); err != nil {
 			return err

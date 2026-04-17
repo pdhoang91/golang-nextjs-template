@@ -50,7 +50,7 @@ Luồng phụ thuộc:
 
 ### Feature-based ở frontend
 Tách theo feature giúp scale tốt hơn kiểu gom toàn bộ page/component/service vào một chỗ.  
-Tuy nhiên vẫn giữ `components/`, `hooks/`, `services/`, `types/` dùng chung để không bị quá nặng.
+Tuy nhiên vẫn giữ `components/`, `hooks/`, `services/` dùng chung, còn type đặc thù của feature thì đặt ngay trong feature đó. `types/api.ts` giữ các generic API types dùng lại nhiều nơi.
 
 ## 3. Cây thư mục
 
@@ -105,11 +105,19 @@ fullstack-template/
 │   │   │   │   └── persistence/
 │   │   │   │       └── postgres/
 │   │   │   │           └── todo_repository.go
-│   │   │   ├── repository/
-│   │   │   │   └── todo_repository.go
+│   │   │   ├── domain/
+│   │   │   │   ├── health/
+│   │   │   │   │   └── health.go
+│   │   │   │   └── todo/
+│   │   │   │       ├── todo.go
+│   │   │   │       └── repository.go
 │   │   │   └── usecase/
-│   │   │       ├── todo_usecase.go
-│   │   │       └── todo_usecase_test.go
+│   │   │       ├── health/
+│   │   │       │   ├── usecase.go
+│   │   │       │   └── health_usecase_test.go
+│   │   │       └── todo/
+│   │   │           ├── usecase.go
+│   │   │           └── todo_usecase_test.go
 │   │   └── migrations/
 │   │       ├── 000001_create_todos.down.sql
 │   │       └── 000001_create_todos.up.sql
@@ -139,15 +147,15 @@ fullstack-template/
 │       ├── features/
 │       │   ├── health/
 │       │   │   ├── components/
-│       │   │   │   └── health-status-card.tsx
+│       │   │   │   └── card.tsx
 │       │   │   └── hooks/
-│       │   │       └── use-health.ts
+│       │   │       └── use.ts
 │       │   └── todos/
 │       │       ├── components/
-│       │       │   ├── todo-create-form.tsx
-│       │       │   └── todo-list-card.tsx
+│       │       │   ├── form.tsx
+│       │       │   └── list.tsx
 │       │       └── hooks/
-│       │           └── use-todos.ts
+│       │           └── use.ts
 │       ├── hooks/
 │       │   └── use-async-state.ts
 │       ├── lib/
@@ -181,7 +189,7 @@ docker compose up --build
 Sau đó truy cập:
 
 - Frontend: `http://localhost:3000`
-- Backend health: `http://localhost:8080/health`
+- Backend health: `http://localhost:8080/api/v1/health`
 - Backend todos: `http://localhost:8080/api/v1/todos`
 
 ## 5. Chạy local từng app
@@ -212,12 +220,12 @@ Xem file:
 Pattern backend cho module mới:
 
 1. `internal/domain/<module>`
-2. `internal/repository/<module>_repository.go`
-3. `internal/usecase/<module>_usecase.go`
+2. `internal/domain/<module>/repository.go`
+3. `internal/usecase/<module>/usecase.go`
 4. `internal/infrastructure/persistence/postgres/<module>_repository.go`
 5. `internal/delivery/http/handler/<module>_handler.go`
 6. `internal/delivery/http/dto/<module>.go`
-7. đăng ký route trong `router/router.go`
+7. cho handler tự đăng ký route và truyền registrar vào `router/router.go`
 8. thêm migration SQL
 
 ## 7. Các điểm cần tránh

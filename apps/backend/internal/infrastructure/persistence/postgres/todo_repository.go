@@ -8,7 +8,6 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/your-org/fullstack-template/apps/backend/internal/domain/todo"
-	"github.com/your-org/fullstack-template/apps/backend/internal/repository"
 )
 
 type todoModel struct {
@@ -16,8 +15,8 @@ type todoModel struct {
 	Title       string    `gorm:"type:varchar(255);not null"`
 	Description string    `gorm:"type:text"`
 	Completed   bool      `gorm:"type:boolean;not null;default:false"`
-	CreatedAt   time.Time `gorm:"type:timestamptz;not null"`
-	UpdatedAt   time.Time `gorm:"type:timestamptz;not null"`
+	CreatedAt   time.Time `gorm:"type:timestamptz;not null;autoCreateTime"`
+	UpdatedAt   time.Time `gorm:"type:timestamptz;not null;autoUpdateTime"`
 }
 
 func (todoModel) TableName() string {
@@ -28,7 +27,7 @@ type todoRepository struct {
 	db *gorm.DB
 }
 
-func NewTodoRepository(db *gorm.DB) repository.TodoRepository {
+func NewTodoRepository(db *gorm.DB) todo.TodoRepository {
 	return &todoRepository{db: db}
 }
 
@@ -75,13 +74,6 @@ func mapToModel(entity todo.Todo) todoModel {
 		Completed:   entity.Completed,
 		CreatedAt:   entity.CreatedAt,
 		UpdatedAt:   entity.UpdatedAt,
-	}
-
-	if model.CreatedAt.IsZero() {
-		model.CreatedAt = time.Now().UTC()
-	}
-	if model.UpdatedAt.IsZero() {
-		model.UpdatedAt = time.Now().UTC()
 	}
 
 	return model

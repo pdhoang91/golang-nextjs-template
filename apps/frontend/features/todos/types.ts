@@ -7,7 +7,7 @@ export type Todo = {
   updated_at: string;
 };
 
-export type CreateTodoPayload = {
+export type CreateTodoInput = {
   title: string;
   description: string;
 };

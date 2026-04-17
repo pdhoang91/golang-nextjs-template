@@ -10,8 +10,7 @@ internal/
   bootstrap/
   config/
   domain/
-  repository/
-  usecase/
+  usecase/<module>/
   infrastructure/
   delivery/http/
 migrations/
@@ -19,9 +18,8 @@ migrations/
 
 ### Tư duy chính
 
-- **domain**: entity + business errors
-- **usecase**: business rule
-- **repository**: contract
+- **domain**: entity + business errors + repository contract
+- **usecase/<module>**: business rule
 - **repository implementation**: GORM/Postgres
 - **delivery/http**: handler, DTO, route, middleware
 - **bootstrap**: dependency wiring
@@ -36,15 +34,15 @@ go run ./cmd/server
 
 API mặc định:
 
-- `GET /health`
+- `GET /api/v1/health`
 - `GET /api/v1/todos`
 - `POST /api/v1/todos`
 
 ## Chạy migration
 
 ```bash
-go run ./cmd/migrate up
-go run ./cmd/migrate down
+make migrate-up
+make migrate-down
 ```
 
 ## Test
@@ -57,14 +55,24 @@ go test ./...
 
 Ví dụ module `users`.
 
+## Ví dụ module không cần repository
+
+`health` là ví dụ module chỉ cần:
+- `internal/domain/health/health.go`
+- `internal/usecase/health/usecase.go`
+- `internal/delivery/http/dto/health_response.go`
+- `internal/delivery/http/handler/health_handler.go`
+
+Module kiểu này phù hợp cho các query đơn giản, check status, hoặc logic chỉ ghép dữ liệu từ config/runtime.
+
 ### 1. Tạo domain
 - `internal/domain/user/user.go`
 
 ### 2. Tạo repository interface
-- `internal/repository/user_repository.go`
+- `internal/domain/user/repository.go`
 
 ### 3. Tạo usecase
-- `internal/usecase/user_usecase.go`
+- `internal/usecase/user/usecase.go`
 
 ### 4. Tạo repository implementation
 - `internal/infrastructure/persistence/postgres/user_repository.go`
@@ -77,7 +85,7 @@ Ví dụ module `users`.
 Khởi tạo repo, usecase, handler trong `internal/bootstrap/app.go`.
 
 ### 7. Đăng ký route
-Thêm route ở `internal/delivery/http/router/router.go`.
+Cho handler tự đăng ký route và truyền registrar vào `internal/delivery/http/router/router.go`.
 
 ### 8. Tạo migration
 Thêm file trong `migrations/`.

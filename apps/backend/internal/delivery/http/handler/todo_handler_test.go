@@ -12,10 +12,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 
+	"github.com/your-org/fullstack-template/apps/backend/internal/constants"
 	httpdto "github.com/your-org/fullstack-template/apps/backend/internal/delivery/http/dto"
 	handler "github.com/your-org/fullstack-template/apps/backend/internal/delivery/http/handler"
 	"github.com/your-org/fullstack-template/apps/backend/internal/domain/todo"
-	"github.com/your-org/fullstack-template/apps/backend/internal/usecase"
+	usetodo "github.com/your-org/fullstack-template/apps/backend/internal/usecase/todo"
 )
 
 type stubTodoUsecase struct{}
@@ -23,17 +24,17 @@ type stubTodoUsecase struct{}
 func (s stubTodoUsecase) List(_ context.Context) ([]todo.Todo, error) {
 	return []todo.Todo{
 		{
-			ID:          uuid.MustParse("7c88a7f6-2e65-4c6f-b6df-8bfb84d70b5e"),
-			Title:       "Seeded todo",
-			Description: "Returned from stub usecase",
+			ID:          uuid.MustParse(constants.TestUUIDTodoListID),
+			Title:       constants.TestTodoSeedTitle,
+			Description: constants.TestTodoSeedDescription,
 			Completed:   false,
 		},
 	}, nil
 }
 
-func (s stubTodoUsecase) Create(_ context.Context, input usecase.CreateTodoInput) (todo.Todo, error) {
+func (s stubTodoUsecase) Create(_ context.Context, input usetodo.CreateTodoInput) (todo.Todo, error) {
 	return todo.Todo{
-		ID:          uuid.MustParse("4d9636a8-f035-4e72-9dd6-6d26da6d5ad3"),
+		ID:          uuid.MustParse(constants.TestUUIDTodoCreateID),
 		Title:       input.Title,
 		Description: input.Description,
 		Completed:   false,
@@ -45,15 +46,16 @@ func TestTodoHandlerList(t *testing.T) {
 
 	r := gin.New()
 	h := handler.NewTodoHandler(stubTodoUsecase{})
-	r.GET("/api/v1/todos", h.List)
+	apiV1 := r.Group(constants.APIV1Prefix)
+	h.RegisterRoutes(apiV1)
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/todos", nil)
+	req := httptest.NewRequest(http.MethodGet, constants.APIV1Prefix+constants.TodosRoute, nil)
 
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code)
-	require.Contains(t, w.Body.String(), "Seeded todo")
+	require.Contains(t, w.Body.String(), constants.TestTodoSeedTitle)
 }
 
 func TestTodoHandlerCreate(t *testing.T) {
@@ -61,20 +63,21 @@ func TestTodoHandlerCreate(t *testing.T) {
 
 	r := gin.New()
 	h := handler.NewTodoHandler(stubTodoUsecase{})
-	r.POST("/api/v1/todos", h.Create)
+	apiV1 := r.Group(constants.APIV1Prefix)
+	h.RegisterRoutes(apiV1)
 
 	body, err := json.Marshal(httpdto.CreateTodoRequest{
-		Title:       "Write docs",
-		Description: "Document the template",
+		Title:       constants.TestTodoCreateTitle,
+		Description: constants.TestTodoCreateDescription,
 	})
 	require.NoError(t, err)
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/todos", bytes.NewBuffer(body))
-	req.Header.Set("Content-Type", "application/json")
+	req := httptest.NewRequest(http.MethodPost, constants.APIV1Prefix+constants.TodosRoute, bytes.NewBuffer(body))
+	req.Header.Set(constants.HeaderContentType, constants.ContentTypeJSON)
 
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusCreated, w.Code)
-	require.Contains(t, w.Body.String(), "Write docs")
+	require.Contains(t, w.Body.String(), constants.TestTodoCreateTitle)
 }

@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/your-org/fullstack-template/apps/backend/internal/bootstrap"
+	"github.com/your-org/fullstack-template/apps/backend/internal/constants"
 )
 
 func main() {
@@ -16,12 +17,12 @@ func main() {
 
 	app, err := bootstrap.NewApp(ctx)
 	if err != nil {
-		slog.Error("failed to bootstrap application", "error", err)
+		slog.Error(constants.LogFailedToBootstrapApplication, "error", err)
 		os.Exit(1)
 	}
 
 	if err := app.Run(ctx); err != nil {
-		app.Logger().Error("application stopped with error", "error", err)
+		app.Logger().Error(constants.LogApplicationStoppedWithError, "error", err)
 		os.Exit(1)
 	}
 }

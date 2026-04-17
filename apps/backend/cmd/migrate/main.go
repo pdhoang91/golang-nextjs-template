@@ -6,12 +6,13 @@ import (
 	"os"
 
 	"github.com/your-org/fullstack-template/apps/backend/internal/config"
+	"github.com/your-org/fullstack-template/apps/backend/internal/constants"
 	"github.com/your-org/fullstack-template/apps/backend/internal/infrastructure/migration"
 )
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatal("usage: go run ./cmd/migrate [up|down]")
+		log.Fatalf(constants.MigrationUsageFormat, constants.MigrationActionUp, constants.MigrationActionDown)
 	}
 
 	cfg, err := config.Load()
@@ -22,17 +23,17 @@ func main() {
 	direction := os.Args[1]
 
 	switch direction {
-	case "up":
+	case constants.MigrationActionUp:
 		err = migration.Up(cfg.MigrationDatabaseURL(), cfg.MigrationsPath)
-	case "down":
+	case constants.MigrationActionDown:
 		err = migration.Down(cfg.MigrationDatabaseURL(), cfg.MigrationsPath)
 	default:
-		log.Fatalf("unsupported migration command: %s", direction)
+		log.Fatalf(constants.MigrationUnsupportedCommandFormat, direction)
 	}
 
 	if err != nil {
-		log.Fatalf("migration %s failed: %v", direction, err)
+		log.Fatalf(constants.MigrationFailedFormat, direction, err)
 	}
 
-	fmt.Printf("migration %s completed\n", direction)
+	fmt.Printf(constants.MigrationCompletedFormat+"\n", direction)
 }

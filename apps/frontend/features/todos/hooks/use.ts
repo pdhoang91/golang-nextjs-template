@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { TODO_ERROR_MESSAGE } from "@/features/todos/constants";
 import { useAsyncState } from "@/hooks/use-async-state";
 import { createTodo, getTodos } from "@/services/todo.service";
-import type { CreateTodoPayload, Todo } from "@/types/todo";
+import type { CreateTodoInput, Todo } from "@/features/todos/types";
 
 export function useTodos() {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -18,7 +19,7 @@ export function useTodos() {
       setTodos(response.data);
       succeed();
     } catch (err) {
-      fail(err instanceof Error ? err.message : "Failed to fetch todos");
+      fail(err instanceof Error ? err.message : TODO_ERROR_MESSAGE);
     }
   }, [start, fail, succeed]);
 
@@ -26,7 +27,7 @@ export function useTodos() {
     void fetchTodos();
   }, [fetchTodos]);
 
-  const addTodo = useCallback(async (payload: CreateTodoPayload) => {
+  const addTodo = useCallback(async (payload: CreateTodoInput) => {
     setIsCreating(true);
     try {
       const response = await createTodo(payload);

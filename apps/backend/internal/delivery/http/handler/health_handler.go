@@ -2,28 +2,35 @@ package handler
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/your-org/fullstack-template/apps/backend/internal/config"
+	"github.com/your-org/fullstack-template/apps/backend/internal/constants"
+	httpdto "github.com/your-org/fullstack-template/apps/backend/internal/delivery/http/dto"
+	"github.com/your-org/fullstack-template/apps/backend/internal/delivery/http/response"
+	healthusecase "github.com/your-org/fullstack-template/apps/backend/internal/usecase/health"
 )
 
 type HealthHandler struct {
-	config *config.Config
+	healthUsecase healthusecase.HealthUsecase
 }
 
-func NewHealthHandler(config *config.Config) *HealthHandler {
+func NewHealthHandler(healthUsecase healthusecase.HealthUsecase) *HealthHandler {
 	return &HealthHandler{
-		config: config,
+		healthUsecase: healthUsecase,
 	}
 }
 
+func (h *HealthHandler) RegisterRoutes(rg *gin.RouterGroup) {
+	rg.GET(constants.HealthRoute, h.Get)
+}
+
 func (h *HealthHandler) Get(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"status":      "ok",
-		"service":     h.config.AppName,
-		"environment": h.config.AppEnv,
-		"timestamp":   time.Now().UTC(),
-	})
+	status, err := h.healthUsecase.Get(c.Request.Context())
+	if err != nil {
+		response.WriteError(c, http.StatusInternalServerError, constants.ErrFailedToFetchHealth)
+		return
+	}
+
+	response.WriteSuccess(c, http.StatusOK, httpdto.ToHealthResponse(status))
 }
